@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Booleansearchengine by krithivasanchandran</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Booleansearchengine</h1>
+        <h2>BooleanSearchEngine</h2>
+        <a href="https://github.com/krithivasanchandran/BooleanSearchEngine" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h3>
+<a id="building-a-boolean-search-engine" class="anchor" href="#building-a-boolean-search-engine" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building a Boolean Search Engine</h3>
+
+<p>implement the methods AND, OR, NOT and perform some queries. We have a small corpus (document collection)
+of Amazon.com reviews on electronics. After your page is generated, you can check out the new branch:</p>
+
+<pre><code>$ cd krithivasanchandran/BooleanSearchEngine
+$ git fetch origin
+$ git checkout BooleanSearchEngine
+</code></pre>
+
+<h3>
+<a id="corpus-document-collection-mini_projalltxt" class="anchor" href="#corpus-document-collection-mini_projalltxt" aria-hidden="true"><span class="octicon octicon-link"></span></a>Corpus (document collection): mini_proj/all.txt</h3>
+
+<p>This contains the raw reviews. Each line is a review/document in our context. There are total 1248 documents. Documents in theposting list should be indexed from 1 (and not 0) where the first document refers to the first line in mini_proj/all.txt.
+The corpus is also available in document matrix format: mini_proj/docs.txt with associated vocabulary mapping
+mini_proj/vocab_map.txt generated using a helper method DatasetFormatter.</p>
+
+<h3>
+<a id="pre-processing-datasetformatterjava" class="anchor" href="#pre-processing-datasetformatterjava" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-processing: DatasetFormatter.java</h3>
+
+<p>This class provides preprocessing (parsing, generating the vocabulary map, filtering stopwords based on counts, etc.) already implemented to get you started. You are required to work on the formatted data produced by this class. Your best bet is to use it directly within the constructor of BooleanRetrieval.java class as follows:</p>
+
+<pre><code>public BooleanRetrieval() throws Exception{
+// Initialize variables and Format the data using a pre-processing class and
+set up variables
+invIndex = new HashMap&lt;String, Set&lt;Integer&gt;&gt;();
+DatasetFormatter formater = new DatasetFormatter();
+formater.textCorpusFormatter("./all.txt");
+docs = formater.getDocs();
+vocab = formater.getVocab();
+</code></pre>
+
+<h3>
+<a id="void-createpostinglist" class="anchor" href="#void-createpostinglist" aria-hidden="true"><span class="octicon octicon-link"></span></a>void createPostingList()</h3>
+
+<p>You are required to build the inverted index in the method void createPostingList() for this preprocessed corpus. Note
+that you are required to work with the pre-processed data, i.e., output of
+DatasetFormatter.textCorpusFormatter()defined in Section 2 OR the document matrix/vocabulary defined by the
+files mini_proj/docs.txt and mini_proj/vocab_map.txt (which are the same). Do NOT work with the raw corpus mini_proj/all.txt
+and re-parse!</p>
+
+<pre><code>void createPostingList() {
+//Initialze the inverted index with a SortedSet (so that the later additions become
+easy!)
+for(String s:vocab){
+invIndex.put(s, new TreeSet&lt;Integer&gt;());
+}
+//for each doc
+for(int i=0; i&lt;docs.length; i++){
+//for each word of that doc
+for(int j=0; j&lt;docs[i].length; j++){
+//Get the actual word in position j of doc i
+String w = map.get(docs[i][j]);
+//Now simply update the posting list of this word w in the invIndex
+by adding the document i
+</code></pre>
+
+<h3>
+<a id="set-intersectionset-a-set-b" class="anchor" href="#set-intersectionset-a-set-b" aria-hidden="true"><span class="octicon octicon-link"></span></a>Set intersection(Set a, Set b)</h3>
+
+<p>This method accepts two posting lists using the Set collections and returns the intersection of them. You are required to implement it using the algorithm for intersection discussed in class.</p>
+
+<pre><code>Set&lt;Integer&gt; intersection(Set&lt;Integer&gt; a, Set&lt;Integer&gt; b){
+/*
+First convert the posting lists from sorted set to something we
+can iterate easily using an index. I choose to use ArrayList&lt;Integer&gt;.
+Once can also use other enumerable.
+*/
+ArrayList&lt;Integer&gt; PostingList_a = new ArrayList&lt;Integer&gt;(a);
+ArrayList&lt;Integer&gt; PostingList_b = new ArrayList&lt;Integer&gt;(b);
+TreeSet result = new TreeSet();
+//Set indices to iterate two lists. I use i, j
+int i = 0;
+int j = 0;
+while(i!=PostingList_a.size() &amp;&amp; j!=PostingList_b.size()){
+…
+Then we can use the result of intersection to perform a AND query as follows:
+Set &lt;Integer&gt; evaluateANDQuery(String a, String b){
+return intersection(invIndex.get(a), invIndex.get(b));
+}
+</code></pre>
+
+<h3>
+<a id="evaluatingchecking-posting-lists-in-the-inverted-index" class="anchor" href="#evaluatingchecking-posting-lists-in-the-inverted-index" aria-hidden="true"><span class="octicon octicon-link"></span></a>Evaluating/checking posting lists in the inverted index</h3>
+
+<p>Let us get a feel of the corpus by exploring some examples. Assuming you have implemented the inverted index correctly.
+Numbering document indices starting at 1 (in our corpus), the posting lists for the following words should be as follows:</p>
+
+<pre><code>freeze -&gt; [129, 313, 442, 493, 912] (i.e., the term “freeze” is present in documents
+129, 313, etc.)
+ctrl -&gt; [23, 47, 138, 232, 498, 882, 993, 1106, 1124, 1218]
+wifi -&gt; [46, 66, 113, 158, 746, 1248]
+cpu -&gt; [604, 800, 959, 1156]
+</code></pre>
+
+<h3>
+<a id="evaluatingchecking-and-queries" class="anchor" href="#evaluatingchecking-and-queries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Evaluating/checking AND queries</h3>
+
+<p>Assuming you have implemented the intersection method correctly, then we should expect the following results for the following queries:</p>
+
+<pre><code>mouse AND wifi -&gt; [113, 158] (i.e., there are two documents in our corpus which contain
+both the terms “mouse” and “wifi”. And these are document at line 113 and 158 in all.txt)
+mouse AND scrolling -&gt; [80, 86, 348, 1029]
+errors AND report -&gt; [] (i.e., there are no documents in the collection containing both
+the terms “errors” and “report”)
+</code></pre>
+
+<h3>
+<a id="implementing-union-and-not-operations-on-posting-lists" class="anchor" href="#implementing-union-and-not-operations-on-posting-lists" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implementing UNION and NOT operations on posting lists</h3>
+
+<p>Implement the method Set union(Set a, Set b) to evaluate and retrieve
+documents using the OR Boolean query. Union operation on queries mouse OR keyboard like simply means that we should
+retrieve all documents that appear either in the posting list of the term “mouse” or “keyboard”.
+You can use the evaluateORQuery() method implemented to return the result of an OR query containing two terms.
+Set  evaluateORQuery(String a, String b){
+return union(invIndex.get(a), invIndex.get(b));
+}
+Assuming you have implemented union correctly, we should expect to get the following results for these queries:</p>
+
+<pre><code>youtube OR reported -&gt; [19, 67, 122, 227, 313, 342, 377, 507, 659, 825, 846]
+errors OR report -&gt; [115, 251, 471, 508, 674, 784, 821, 1068, 1080, 1111, 1158, 1245]
+hell OR movie -&gt; [3, 89, 147, 192, 235, 262, 336, 342, 558, 766, 864, 882, 1120, 1244]
+</code></pre>
+
+<h3>
+<a id="final-output" class="anchor" href="#final-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Output</h3>
+
+<pre><code>$&gt; project_executable query_type query_string output_file_path
+</code></pre>
+
+<p>where query_type takes on one of the 4 values: PLIST, AND, OR, AND-NOT. Query_string takes the actual query and
+output_file_path is the filename with path in ./ that should report the result of your query.</p>
+
+<pre><code>Example runs:
+$&gt; project_executable PLIST cpu cpu_plist.txt
+Should produce
+cpu -&gt; [604, 800, 959, 1156]
+as the contents of cpu_plist.txt
+$&gt; project_executable AND mouse AND scrolling and_result.txt
+Should produce
+mouse AND scrolling -&gt; [80, 86, 348, 1029]
+as the contents of and_result.txt
+$&gt; project_executable AND-NOT Lenovo AND (NOT logitech) and_not_result.txt
+Should produce
+lenovo AND (NOT logitech) -&gt; [360, 373, 379, 451, 517, 540, 787, 869, 942, 1055, 1146]
+as the contents of and_not_result.txt
+</code></pre>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>This is my <a href="https://github.com/KrithivasanChandran" class="user-mention">@KrithivasanChandran</a> GitHub profile. </p>
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+<p>Having trouble with running the project please contact me on : <a href="mailto:krithivasanchandran@gmail.com">krithivasanchandran@gmail.com</a></p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/krithivasanchandran/BooleanSearchEngine/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/krithivasanchandran/BooleanSearchEngine/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/krithivasanchandran/BooleanSearchEngine"></a> is maintained by <a href="https://github.com/krithivasanchandran">krithivasanchandran</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
